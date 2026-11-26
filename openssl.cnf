@@ -1,0 +1,62 @@
+# Configurația OpenSSL pentru Autoritatea de Certificare (CA) internă
+# Laborator nr. 5 - PKI și semnătura digitală
+
+[ ca ]
+default_ca = CA_default
+
+[ CA_default ]
+dir               = ./ca
+certs             = $dir/certs
+crl_dir           = $dir/crl
+new_certs_dir     = $dir/newcerts
+database          = $dir/index.txt          # baza de date a certificatelor emise
+serial            = $dir/serial             # numărul serial următor
+crlnumber         = $dir/crlnumber          # numărul următoarei liste CRL
+private_key       = $dir/private/ca.key.pem # cheia privată a CA (RSA 4096)
+certificate       = $dir/certs/ca.cert.pem  # certificatul auto-semnat al CA
+crl               = $dir/crl/ca.crl.pem     # lista de revocare (CRL)
+default_md        = sha256
+default_days      = 365                     # certificatele utilizatorilor: 365 zile
+default_crl_days  = 30
+preserve          = no
+policy            = policy_loose
+unique_subject    = no
+copy_extensions   = none
+
+[ policy_loose ]
+countryName             = optional
+stateOrProvinceName     = optional
+localityName            = optional
+organizationName        = optional
+organizationalUnitName  = optional
+commonName              = supplied
+emailAddress            = optional
+
+[ req ]
+default_bits        = 2048
+distinguished_name  = req_distinguished_name
+string_mask         = utf8only
+default_md          = sha256
+prompt              = no
+
+[ req_distinguished_name ]
+CN = placeholder
+
+# Extensii pentru certificatul rădăcină (self-signed) al CA
+[ v3_ca ]
+subjectKeyIdentifier   = hash
+authorityKeyIdentifier = keyid:always,issuer
+basicConstraints       = critical, CA:true
+keyUsage               = critical, digitalSignature, cRLSign, keyCertSign
+
+# Extensii pentru certificatele utilizatorilor (semnătură digitală)
+[ usr_cert ]
+basicConstraints       = CA:FALSE
+subjectKeyIdentifier   = hash
+authorityKeyIdentifier = keyid,issuer
+keyUsage               = critical, digitalSignature, nonRepudiation
+extendedKeyUsage       = codeSigning, emailProtection
+crlDistributionPoints  = URI:http://pki.local/ca.crl.pem
+
+[ crl_ext ]
+authorityKeyIdentifier = keyid:always
